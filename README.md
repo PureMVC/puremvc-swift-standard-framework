@@ -3,7 +3,7 @@
 PureMVC is a lightweight framework for creating applications based upon the classic [Model-View-Controller](http://en.wikipedia.org/wiki/Model-view-controller) design meta-pattern. This is the specific implementation for the AS3 language, and the reference implementation for all other PureMVC Ports. It does not support [modular programming](http://en.wikipedia.org/wiki/Modular_programming) since it uses [Singletons](http://en.wikipedia.org/wiki/Singleton_pattern) as Core actors rather than the [Multiton](http://en.wikipedia.org/wiki/Multiton) used in the [MultiCore](https://github.com/PureMVC/puremvc-swift-multicore-framework/wiki) Version.
 
 * [API Docs](http://puremvc.org/pages/docs/Swift/standard/)
-* [Unit Tests](https://github.com/PureMVC/puremvc-swift-standard-framework/PureMVCTests/wiki)
+* [Unit Tests](http://puremvc.github.io/images/Swift/unittest/standard.png)
 * [Discussion](http://forums.puremvc.org/index.php?board=120)
 * [Standard Version Overview Presentation](http://puremvc.tv/#P100)
 
