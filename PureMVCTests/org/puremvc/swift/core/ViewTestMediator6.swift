@@ -13,7 +13,7 @@ A Mediator class used by ViewTest.
 
 `@see org.puremvc.swift.core.view.ViewTest ViewTest`
 */
-public class ViewTestMediator6: Mediator, IMediator {
+public class ViewTestMediator6: Mediator {
     
     /**
     The Mediator base name
@@ -33,7 +33,7 @@ public class ViewTestMediator6: Mediator, IMediator {
     
     public override func handleNotification(notification: INotification) {
         //temp implementation until facade is developed
-        var view: IView = View.getInstance() { View() }
+        let view: IView = View.getInstance() { View() }
         view.removeMediator(mediatorName)
     }
     

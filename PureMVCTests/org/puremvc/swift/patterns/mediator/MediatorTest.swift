@@ -32,7 +32,7 @@ class MediatorTest: XCTestCase {
     */
     func testNameAccessor() {
         // Create a new Mediator and use accessors to set the mediator name
-        var mediator: Mediator = Mediator()
+        let mediator: Mediator = Mediator()
         
         // test assertions
         XCTAssertTrue(mediator.mediatorName == Mediator.NAME, "Expecting mediator.mediatorName == Mediator.NAME()")
@@ -43,10 +43,10 @@ class MediatorTest: XCTestCase {
     */
     func testViewAccessor() {
         // Create a view object
-        var view = Notification(name: "test", body: 4)
+        let view = Notification(name: "test", body: 4)
         
         // Create a new Proxy and use accessors to set the proxy name
-        var mediator = Mediator(mediatorName: Mediator.NAME, viewComponent: view)
+        let mediator = Mediator(mediatorName: Mediator.NAME, viewComponent: view)
         
         // test assertions
         XCTAssertTrue(mediator.viewComponent as! Notification === view as Notification, "Expecting mediator.viewComponent === view")

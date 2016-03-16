@@ -25,12 +25,12 @@ class NotifierTest: XCTestCase {
     Tests notifier methods.
     */
     func testNotifier() {
-        var facade = Facade.getInstance() { Facade() }
+        let facade = Facade.getInstance() { Facade() }
                 
-        var vo = FacadeTestVO(input: 5)
+        let vo = FacadeTestVO(input: 5)
         facade.registerCommand("testCommand", closure: {FacadeTestCommand()})
         
-        var notifier = Notifier()
+        let notifier = Notifier()
         notifier.sendNotification("testCommand", body: vo)
         
         XCTAssertTrue(vo.result == 10, "Expecting vo.result == 10")
