@@ -79,8 +79,8 @@ public class Model: IModel {
     /**
     `Model` Singleton Factory method.
     
-    :param: closure reference that returns `IModel`
-    :returns: the Singleton instance
+    - parameter closure: reference that returns `IModel`
+    - returns: the Singleton instance
     */
     public class func getInstance(closure: () -> IModel) -> IModel {
         dispatch_once(&self.token) {
@@ -92,7 +92,7 @@ public class Model: IModel {
     /**
     Register an `IProxy` with the `Model`.
     
-    :param: proxy an `IProxy` to be held by the `Model`.
+    - parameter proxy: an `IProxy` to be held by the `Model`.
     */
     public func registerProxy(proxy: IProxy) {
         dispatch_barrier_sync(proxyMapQueue) {
@@ -104,8 +104,8 @@ public class Model: IModel {
     /**
     Retrieve an `IProxy` from the `Model`.
     
-    :param: proxyName
-    :returns: the `IProxy` instance previously registered with the given `proxyName`.
+    - parameter proxyName:
+    - returns: the `IProxy` instance previously registered with the given `proxyName`.
     */
     public func retrieveProxy(proxyName: String) -> IProxy? {
         var proxy: IProxy?
@@ -118,8 +118,8 @@ public class Model: IModel {
     /**
     Check if a Proxy is registered
     
-    :param: proxyName
-    :returns: whether a Proxy is currently registered with the given `proxyName`.
+    - parameter proxyName:
+    - returns: whether a Proxy is currently registered with the given `proxyName`.
     */
     public func hasProxy(proxyName: String) -> Bool {
         var result = false
@@ -132,16 +132,15 @@ public class Model: IModel {
     /**
     Remove an `IProxy` from the `Model`.
     
-    :param: proxyName name of the `IProxy` instance to be removed.
-    :returns: the `IProxy` that was removed from the `Model`
+    - parameter proxyName: name of the `IProxy` instance to be removed.
+    - returns: the `IProxy` that was removed from the `Model`
     */
     public func removeProxy(proxyName: String) -> IProxy? {
         var removed: IProxy?
         dispatch_barrier_sync(proxyMapQueue) {
             if let proxy = self.proxyMap[proxyName] {
                 proxy.onRemove()
-                self.proxyMap[proxyName] = nil
-                removed = proxy
+                removed = self.proxyMap.removeValueForKey(proxyName)
             }
         }
         return removed

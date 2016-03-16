@@ -33,7 +33,7 @@ class ControllerTest: XCTestCase {
     */
     func testGetInstance() {
         // Test Factory Method
-        var controller: IController = Controller.getInstance() { Controller() }
+        let controller: IController = Controller.getInstance() { Controller() }
         
         // test assertions
         XCTAssertNotNil(controller as? Controller, "Expecting instance not nil")
@@ -55,12 +55,12 @@ class ControllerTest: XCTestCase {
     */
     func testRegisterAndExecuteCommand() {
         // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
-        var controller: IController = Controller.getInstance() { Controller() }
+        let controller: IController = Controller.getInstance() { Controller() }
         controller.registerCommand("ControllerTest", closure: {ControllerTestCommand()})
         
         // Create a 'ControllerTest' note
-        var vo: ControllerTestVO = ControllerTestVO(input: 12)
-        var note = Notification(name: "ControllerTest", body: vo)
+        let vo: ControllerTestVO = ControllerTestVO(input: 12)
+        let note = Notification(name: "ControllerTest", body: vo)
         
         // Tell the controller to execute the Command associated with the note
         // the ControllerTestCommand invoked will multiply the vo.input value
@@ -80,12 +80,12 @@ class ControllerTest: XCTestCase {
     */
     func testRegisterAndRemoveCommand() {
         // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
-        var controller: IController = Controller.getInstance() { Controller() }
+        let controller: IController = Controller.getInstance() { Controller() }
         controller.registerCommand("ControllerRemoveTest", closure: {ControllerTestCommand()})
         
         // Create a 'ControllerTest' note
-        var vo = ControllerTestVO(input: 12)
-        var note = Notification(name: "ControllerRemoveTest", body: vo)
+        let vo = ControllerTestVO(input: 12)
+        let note = Notification(name: "ControllerRemoveTest", body: vo)
         
         // Tell the controller to execute the Command associated with the note
         // the ControllerTestCommand invoked will multiply the vo.input value
@@ -115,7 +115,7 @@ class ControllerTest: XCTestCase {
     */
     func testHasCommand() {
         // register the ControllerTestCommand to handle 'hasCommandTest' notes
-        var controller = Controller.getInstance() { Controller() }
+        let controller = Controller.getInstance() { Controller() }
         controller.registerCommand("hasCommandTest", closure: {ControllerTestCommand()})
         
         // test that hasCommand returns true for hasCommandTest notifications
@@ -141,7 +141,7 @@ class ControllerTest: XCTestCase {
     */
     func testReregisterAndExecuteCommand() {
         // Fetch the controller, register the ControllerTestCommand2 to handle 'ControllerTest2' notes
-        var controller = Controller.getInstance() { Controller() }
+        let controller = Controller.getInstance() { Controller() }
         controller.registerCommand("ControllerTest2", closure: {ControllerTestCommand2()})
         
         // Remove the Command from the Controller
@@ -151,11 +151,11 @@ class ControllerTest: XCTestCase {
         controller.registerCommand("ControllerTest2", closure: {ControllerTestCommand2()})
         
         // Create a 'ControllerTest2' note
-        var vo = ControllerTestVO(input: 12)
-        var note = Notification(name: "ControllerTest2", body: vo)
+        let vo = ControllerTestVO(input: 12)
+        let note = Notification(name: "ControllerTest2", body: vo)
         
         // retrieve a reference to the View from the same core.
-        var view = View.getInstance() { View() }
+        let view = View.getInstance() { View() }
         
         // send the Notification
         view.notifyObservers(note)

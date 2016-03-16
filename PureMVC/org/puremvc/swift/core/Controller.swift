@@ -97,8 +97,8 @@ public class Controller: IController {
     /**
     `Controller` Singleton Factory method.
     
-    :param: closure reference that returns `IController`
-    :returns: the Singleton instance of `Controller`
+    - parameter closure: reference that returns `IController`
+    - returns: the Singleton instance of `Controller`
     */
     public class func getInstance(closure: () -> IController) -> IController {
         dispatch_once(&self.token) {
@@ -111,12 +111,12 @@ public class Controller: IController {
     If an `ICommand` has previously been registered
     to handle a the given `INotification`, then it is executed.
     
-    :param: note an `INotification`
+    - parameter note: an `INotification`
     */
     public func executeCommand(notification: INotification) {
         dispatch_sync(commandMapQueue) {
             if let closure = self.commandMap[notification.name] {
-                var commandInstance = closure()
+                let commandInstance = closure()
                 commandInstance.execute(notification)
             }
         }
@@ -133,8 +133,8 @@ public class Controller: IController {
     The Observer for the new ICommand is only created if this the
     first time an ICommand has been regisered for this Notification name.
     
-    :param: notificationName the name of the `INotification`
-    :param: closure reference that instantiates and returns `ICommand`
+    - parameter notificationName: the name of the `INotification`
+    - parameter closure: reference that instantiates and returns `ICommand`
     */
     public func registerCommand(notificationName: String, closure: () -> ICommand) {
         dispatch_barrier_sync(commandMapQueue) {
@@ -148,8 +148,8 @@ public class Controller: IController {
     /**
     Check if a Command is registered for a given Notification
     
-    :param: notificationName
-    :returns: whether a Command is currently registered for the given `notificationName`.
+    - parameter notificationName:
+    - returns: whether a Command is currently registered for the given `notificationName`.
     */
     public func hasCommand(notificationName: String) -> Bool {
         var result = false
@@ -162,13 +162,13 @@ public class Controller: IController {
     /**
     Remove a previously registered `ICommand` to `INotification` mapping.
     
-    :param: notificationName the name of the `INotification` to remove the `ICommand` mapping for
+    - parameter notificationName: the name of the `INotification` to remove the `ICommand` mapping for
     */
     public func removeCommand(notificationName: String) {
         if self.hasCommand(notificationName) {
             dispatch_barrier_sync(commandMapQueue) {
                 self.view!.removeObserver(notificationName, notifyContext: self)
-                self.commandMap[notificationName] = nil
+                self.commandMap.removeValueForKey(notificationName)
             }
         }
     }
