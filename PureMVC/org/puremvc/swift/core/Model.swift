@@ -29,23 +29,23 @@ actors.
 
 `@see org.puremvc.swift.interfaces.IProxy IProxy`
 */
-public class Model: IModel {
+open class Model: IModel {
     
     // Mapping of proxyNames to IProxy instances
-    private var proxyMap: [String: IProxy]
+    fileprivate var proxyMap: [String: IProxy]
     
     // Singleton instance
-    private static var instance: IModel?
+    fileprivate static var instance: IModel?
     
-    // to ensure operation happens only once
-    private static var token: dispatch_once_t = 0
-    
+    // Concurrent queue for singleton instance
+    fileprivate static let instanceQueue = DispatchQueue(label: "org.puremvc.model.instanceQueue", attributes: DispatchQueue.Attributes.concurrent)
+        
     // Concurrent queue for proxyMap
     // for speed and convenience of running concurrently while reading, and thread safety of blocking while mutating
-    private let proxyMapQueue = dispatch_queue_create("org.puremvc.model.proxyMapQueue", DISPATCH_QUEUE_CONCURRENT)
+    fileprivate let proxyMapQueue = DispatchQueue(label: "org.puremvc.model.proxyMapQueue", attributes: DispatchQueue.Attributes.concurrent)
     
     /// Message constant
-    public static let SINGLETON_MSG = "Model Singleton already constructed!"
+    open static let SINGLETON_MSG = "Model Singleton already constructed!"
     
     /**
     Constructor.
@@ -72,7 +72,7 @@ public class Model: IModel {
     instance in your subclass without overriding the
     constructor.
     */
-    public func initializeModel() {
+    open func initializeModel() {
         
     }
     
@@ -82,10 +82,12 @@ public class Model: IModel {
     - parameter closure: reference that returns `IModel`
     - returns: the Singleton instance
     */
-    public class func getInstance(closure: () -> IModel) -> IModel {
-        dispatch_once(&self.token) {
-            self.instance = closure()
-        }
+    open class func getInstance(_ closure: () -> IModel) -> IModel {
+        instanceQueue.sync(flags: .barrier, execute: {
+            if(Model.instance == nil) {
+                Model.instance = closure()
+            }
+        })
         return instance!
     }
     
@@ -94,11 +96,11 @@ public class Model: IModel {
     
     - parameter proxy: an `IProxy` to be held by the `Model`.
     */
-    public func registerProxy(proxy: IProxy) {
-        dispatch_barrier_sync(proxyMapQueue) {
+    open func registerProxy(_ proxy: IProxy) {
+        proxyMapQueue.sync(flags: .barrier, execute: {
             self.proxyMap[proxy.proxyName] = proxy
             proxy.onRegister()
-        }
+        }) 
     }
     
     /**
@@ -107,9 +109,9 @@ public class Model: IModel {
     - parameter proxyName:
     - returns: the `IProxy` instance previously registered with the given `proxyName`.
     */
-    public func retrieveProxy(proxyName: String) -> IProxy? {
+    open func retrieveProxy(_ proxyName: String) -> IProxy? {
         var proxy: IProxy?
-        dispatch_sync(proxyMapQueue) {
+        proxyMapQueue.sync {
             proxy = self.proxyMap[proxyName]
         }
         return proxy
@@ -121,9 +123,9 @@ public class Model: IModel {
     - parameter proxyName:
     - returns: whether a Proxy is currently registered with the given `proxyName`.
     */
-    public func hasProxy(proxyName: String) -> Bool {
+    open func hasProxy(_ proxyName: String) -> Bool {
         var result = false
-        dispatch_sync(proxyMapQueue) {
+        proxyMapQueue.sync {
             result = self.proxyMap[proxyName] != nil
         }
         return result
@@ -135,14 +137,14 @@ public class Model: IModel {
     - parameter proxyName: name of the `IProxy` instance to be removed.
     - returns: the `IProxy` that was removed from the `Model`
     */
-    public func removeProxy(proxyName: String) -> IProxy? {
+    open func removeProxy(_ proxyName: String) -> IProxy? {
         var removed: IProxy?
-        dispatch_barrier_sync(proxyMapQueue) {
+        proxyMapQueue.sync(flags: .barrier, execute: {
             if let proxy = self.proxyMap[proxyName] {
                 proxy.onRemove()
-                removed = self.proxyMap.removeValueForKey(proxyName)
+                removed = self.proxyMap.removeValue(forKey: proxyName)
             }
-        }
+        }) 
         return removed
     }
     

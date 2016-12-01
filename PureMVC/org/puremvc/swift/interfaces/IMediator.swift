@@ -55,7 +55,7 @@ public protocol IMediator: INotifier {
     
     - parameter notification: the `INotification` to be handled
     */
-    func handleNotification(notification: INotification)
+    func handleNotification(_ notification: INotification)
     
     /// Called by the View when the Mediator is registered
     func onRegister()

@@ -27,30 +27,30 @@ In PureMVC, the `View` class assumes these responsibilities:
 
 `@see org.puremvc.swift.patterns.observer.Notification Notification`
 */
-public class View: IView {
+open class View: IView {
     
     // Mapping of Mediator names to Mediator instances
-    private var mediatorMap: [String: IMediator]
+    fileprivate var mediatorMap: [String: IMediator]
     
     // Concurrent queue for mediatorMap
     // for speed and convenience of running concurrently while reading, and thread safety of blocking while mutating
-    private let mediatorMapQueue: dispatch_queue_t = dispatch_queue_create("org.puremvc.view.mediatorMapQueue", DISPATCH_QUEUE_CONCURRENT)
+    fileprivate let mediatorMapQueue: DispatchQueue = DispatchQueue(label: "org.puremvc.view.mediatorMapQueue", attributes: DispatchQueue.Attributes.concurrent)
     
     // Mapping of Notification names to Observer lists
-    private var observerMap: [String: Array<IObserver>]
+    fileprivate var observerMap: [String: Array<IObserver>]
+    
+    // Concurrent queue for singleton instance
+    fileprivate static let instanceQueue = DispatchQueue(label: "org.puremvc.view.instanceQueue", attributes: DispatchQueue.Attributes.concurrent)
     
     // Concurrent queue for observerMap
     // for speed and convenience of running concurrently while reading, and thread safety of blocking while mutating
-    private let observerMapQueue: dispatch_queue_t = dispatch_queue_create("org.puremvc.view.observerMapQueue", DISPATCH_QUEUE_CONCURRENT)
+    fileprivate let observerMapQueue: DispatchQueue = DispatchQueue(label: "org.puremvc.view.observerMapQueue", attributes: DispatchQueue.Attributes.concurrent)
     
     // Singleton instance
-    private static var instance: IView?
-    
-    // to ensure operation happens only once
-    private static var token: dispatch_once_t = 0
+    fileprivate static var instance: IView?
     
     /// Message constant
-    public static let SINGLETON_MSG = "View Singleton already constructed!"
+    open static let SINGLETON_MSG = "View Singleton already constructed!"
     
     /**
     Constructor.
@@ -78,7 +78,7 @@ public class View: IView {
     instance in your subclass without overriding the
     constructor.
     */
-    public func initializeView() {
+    open func initializeView() {
         
     }
     
@@ -88,10 +88,12 @@ public class View: IView {
     - parameter closure: reference that returns `IView`
     - returns: the Singleton instance of `View`
     */
-    public class func getInstance(closure: () -> IView) -> IView {
-        dispatch_once(&self.token) {
-            self.instance = closure()
-        }
+    open class func getInstance(_ closure: () -> IView) -> IView {
+        instanceQueue.sync(flags: .barrier, execute: {
+            if(View.instance == nil) {
+                View.instance = closure()
+            }
+        })
         return instance!
     }
     
@@ -102,14 +104,14 @@ public class View: IView {
     - parameter notificationName: the name of the `INotifications` to notify this `IObserver` of
     - parameter observer: the `IObserver` to register
     */
-    public func registerObserver(notificationName: String, observer: IObserver) {
-        dispatch_barrier_sync(observerMapQueue) {
+    open func registerObserver(_ notificationName: String, observer: IObserver) {
+        observerMapQueue.sync(flags: .barrier, execute: {
             if self.observerMap[notificationName] != nil {
                 self.observerMap[notificationName]!.append(observer)
             } else {
                 self.observerMap[notificationName] = [observer]
             }
-        }
+        }) 
     }
 
     /**
@@ -121,10 +123,10 @@ public class View: IView {
     
     - parameter notification: the `INotification` to notify `IObservers` of.
     */
-    public func notifyObservers(notification: INotification) {
+    open func notifyObservers(_ notification: INotification) {
         var observers: [IObserver]?
         
-        dispatch_sync(observerMapQueue) {
+        observerMapQueue.sync {
             // observers_ref is an immutable/constant reference to the observers list for this notification name
             // Swift Arrays are copied by value, and observers in this case a constant/immutable array
             // The original array may change during the notification loop but irrespective of that all observers will be notified
@@ -147,17 +149,17 @@ public class View: IView {
     - parameter notificationName: which observer list to remove from
     - parameter notifyContext: remove the observer with this object as its notifyContext
     */
-    public func removeObserver(notificationName: String, notifyContext: AnyObject) {
-        dispatch_barrier_sync(observerMapQueue) {
+    open func removeObserver(_ notificationName: String, notifyContext: AnyObject) {
+        observerMapQueue.sync(flags: .barrier, execute: {
             // the observer list for the notification under inspection
             if let observers = self.observerMap[notificationName] {
                 
                 // find the observer for the notifyContext
-                for (index, _) in observers.enumerate() {
+                for (index, _) in observers.enumerated() {
                     if observers[index].compareNotifyContext(notifyContext) {
                         // there can only be one Observer for a given notifyContext
                         // in any given Observer list, so remove it and break
-                        self.observerMap[notificationName]!.removeAtIndex(index)
+                        self.observerMap[notificationName]!.remove(at: index)
                         break;
                     }
                 }
@@ -165,10 +167,10 @@ public class View: IView {
                 // Also, when a Notification's Observer list length falls to
                 // zero, delete the notification key from the observer map
                 if observers.isEmpty {
-                    self.observerMap.removeValueForKey(notificationName);
+                    self.observerMap.removeValue(forKey: notificationName);
                 }
             }
-        }
+        }) 
     }
     
     /**
@@ -187,13 +189,13 @@ public class View: IView {
     - parameter mediatorName: the name to associate with this `IMediator` instance
     - parameter mediator: a reference to the `IMediator` instance
     */
-    public func registerMediator(mediator: IMediator) {
+    open func registerMediator(_ mediator: IMediator) {
         // do not allow re-registration (you must removeMediator first)
         if (hasMediator(mediator.mediatorName)) {
             return
         }
         
-        dispatch_barrier_sync(mediatorMapQueue) {
+        mediatorMapQueue.sync(flags: .barrier, execute: {
             // Register the Mediator for retrieval by name
             self.mediatorMap[mediator.mediatorName] = mediator
             
@@ -214,7 +216,7 @@ public class View: IView {
             
             // alert the mediator that it has been registered
             mediator.onRegister()
-        }
+        }) 
     }
 
     /**
@@ -223,9 +225,9 @@ public class View: IView {
     - parameter mediatorName: the name of the `IMediator` instance to retrieve.
     - returns: the `IMediator` instance previously registered with the given `mediatorName`.
     */
-    public func retrieveMediator(mediatorName: String) -> IMediator? {
+    open func retrieveMediator(_ mediatorName: String) -> IMediator? {
         var mediator: IMediator?
-        dispatch_sync(mediatorMapQueue) {
+        mediatorMapQueue.sync {
             mediator = self.mediatorMap[mediatorName]
         }
         return mediator
@@ -237,9 +239,9 @@ public class View: IView {
     - parameter mediatorName: name of the `IMediator` instance to be removed.
     - returns: the `IMediator` that was removed from the `View`
     */
-    public func removeMediator(mediatorName: String) -> IMediator? {
+    open func removeMediator(_ mediatorName: String) -> IMediator? {
         var removed: IMediator?
-        dispatch_barrier_sync(mediatorMapQueue) {
+        mediatorMapQueue.sync(flags: .barrier, execute: {
             if let mediator = self.mediatorMap[mediatorName] {
                 // for every notification this mediator is interested in...
                 let interests = mediator.listNotificationInterests()
@@ -251,12 +253,12 @@ public class View: IView {
                 }
                 
                 // remove the mediator from the map
-                removed = self.mediatorMap.removeValueForKey(mediatorName)
+                removed = self.mediatorMap.removeValue(forKey: mediatorName)
                 
                 // alert the mediator that it has been removed
                 mediator.onRemove()
             }
-        }
+        }) 
         return removed
     }
     
@@ -266,9 +268,9 @@ public class View: IView {
     - parameter mediatorName:
     - returns: whether a Mediator is registered with the given `mediatorName`.
     */
-    public func hasMediator(mediatorName: String) -> Bool {
+    open func hasMediator(_ mediatorName: String) -> Bool {
         var result = false
-        dispatch_sync(mediatorMapQueue) {
+        mediatorMapQueue.sync {
             result = self.mediatorMap[mediatorName] != nil
         }
         return result

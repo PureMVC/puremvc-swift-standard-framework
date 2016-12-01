@@ -39,6 +39,6 @@ public protocol INotifier {
     - parameter body: the body of the notification (optional)
     - parameter type: the type of the notification (optional)
     */
-    func sendNotification(notificationName: String, body: Any?, type: String?)
+    func sendNotification(_ notificationName: String, body: Any?, type: String?)
     
 }
