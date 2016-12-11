@@ -33,10 +33,10 @@ access to the facade anyway.
 
 `@see org.puremvc.swift.patterns.command.MacroCommand MacroCommand`
 */
-public class Notifier : INotifier {
+open class Notifier : INotifier {
 
     /// Reference to the Facade Singleton
-    public var facade:IFacade = Facade.getInstance() { Facade() }
+    open var facade:IFacade = Facade.getInstance() { Facade() }
     
     /// Constructor
     public init() {
@@ -53,7 +53,7 @@ public class Notifier : INotifier {
     - parameter body: the body of the notification (optional)
     - parameter type: the type of the notification (optional)
     */
-    public func sendNotification(notificationName: String, body: Any?=nil, type: String?=nil) {
+    open func sendNotification(_ notificationName: String, body: Any?=nil, type: String?=nil) {
         facade.sendNotification(notificationName, body: body, type: type)
     }
     

@@ -37,26 +37,26 @@ registrations.
 
 `@see org.puremvc.swift.patterns.command.MacroCommand MacroCommand`
 */
-public class Controller: IController {
+open class Controller: IController {
     
     // Local reference to View
-    private var _view: IView?
+    fileprivate var _view: IView?
     
     // Mapping of Notification names to references of the closures that instantiates and return `ICommand` instance
-    private var commandMap: [String: () -> ICommand]
+    fileprivate var commandMap: [String: () -> ICommand]
     
     // Singleton instance
-    private static var instance: IController?
+    fileprivate static var instance: IController?
     
     /// Message constant
-    public static let SINGLETON_MSG = "Controller Singleton already constructed!"
+    open static let SINGLETON_MSG = "Controller Singleton already constructed!"
     
-    // to ensure operation happens only once
-    private static var token: dispatch_once_t = 0
+    // Concurrent queue for singleton instance
+    fileprivate static let instanceQueue = DispatchQueue(label: "org.puremvc.controller.instanceQueue", attributes: DispatchQueue.Attributes.concurrent)
     
     // Concurrent queue for commandMap
     // for speed and convenience of running concurrently while reading, and thread safety of blocking while mutating
-    private let commandMapQueue = dispatch_queue_create("org.puremvc.controller.commandMapQueue", DISPATCH_QUEUE_CONCURRENT)
+    fileprivate let commandMapQueue = DispatchQueue(label: "org.puremvc.controller.commandMapQueue", attributes: DispatchQueue.Attributes.concurrent)
     
     /**
     Constructor.
@@ -90,7 +90,7 @@ public class Controller: IController {
             view = MyView.getInstance { MyView() }
         }
     */
-    public func initializeController() {
+    open func initializeController() {
         view = View.getInstance { View() }
     }
     
@@ -100,10 +100,12 @@ public class Controller: IController {
     - parameter closure: reference that returns `IController`
     - returns: the Singleton instance of `Controller`
     */
-    public class func getInstance(closure: () -> IController) -> IController {
-        dispatch_once(&self.token) {
-            self.instance = closure()
-        }
+    open class func getInstance(_ closure: () -> IController) -> IController {
+        instanceQueue.sync(flags: .barrier, execute: {
+            if(Controller.instance == nil) {
+                Controller.instance = closure()
+            }
+        })
         return instance!
     }
     
@@ -113,8 +115,8 @@ public class Controller: IController {
     
     - parameter note: an `INotification`
     */
-    public func executeCommand(notification: INotification) {
-        dispatch_sync(commandMapQueue) {
+    open func executeCommand(_ notification: INotification) {
+        commandMapQueue.sync {
             if let closure = self.commandMap[notification.name] {
                 let commandInstance = closure()
                 commandInstance.execute(notification)
@@ -136,13 +138,13 @@ public class Controller: IController {
     - parameter notificationName: the name of the `INotification`
     - parameter closure: reference that instantiates and returns `ICommand`
     */
-    public func registerCommand(notificationName: String, closure: () -> ICommand) {
-        dispatch_barrier_sync(commandMapQueue) {
+    open func registerCommand(_ notificationName: String, closure: @escaping () -> ICommand) {
+        commandMapQueue.sync(flags: .barrier, execute: {
             if self.commandMap[notificationName] == nil { //weak reference to Controller (self) to avoid reference cycle with View and Observer
                 self.view!.registerObserver(notificationName, observer: Observer(notifyMethod: {[weak self] notification in self!.executeCommand(notification)}, notifyContext: self))
             }
             self.commandMap[notificationName] = closure
-        }
+        }) 
     }
     
     /**
@@ -151,9 +153,9 @@ public class Controller: IController {
     - parameter notificationName:
     - returns: whether a Command is currently registered for the given `notificationName`.
     */
-    public func hasCommand(notificationName: String) -> Bool {
+    open func hasCommand(_ notificationName: String) -> Bool {
         var result = false
-        dispatch_sync(commandMapQueue) {
+        commandMapQueue.sync {
             result = self.commandMap[notificationName] != nil
         }
         return result
@@ -164,17 +166,17 @@ public class Controller: IController {
     
     - parameter notificationName: the name of the `INotification` to remove the `ICommand` mapping for
     */
-    public func removeCommand(notificationName: String) {
+    open func removeCommand(_ notificationName: String) {
         if self.hasCommand(notificationName) {
-            dispatch_barrier_sync(commandMapQueue) {
+            commandMapQueue.sync(flags: .barrier, execute: {
                 self.view!.removeObserver(notificationName, notifyContext: self)
-                self.commandMap.removeValueForKey(notificationName)
-            }
+                self.commandMap.removeValue(forKey: notificationName)
+            }) 
         }
     }
     
     /// Local reference to View
-    public var view: IView? {
+    open var view: IView? {
         get { return _view }
         set { _view = newValue }
     }

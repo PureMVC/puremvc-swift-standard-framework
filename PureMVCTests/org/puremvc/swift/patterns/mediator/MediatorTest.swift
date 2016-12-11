@@ -49,12 +49,12 @@ class MediatorTest: XCTestCase {
         let mediator = Mediator(mediatorName: Mediator.NAME, viewComponent: view)
         
         // test assertions
-        XCTAssertTrue(mediator.viewComponent as! Notification === view as Notification, "Expecting mediator.viewComponent === view")
+        XCTAssertTrue(mediator.viewComponent === view, "Expecting mediator.viewComponent === view")
     }
 
     func testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measureBlock() {
+        self.measure() {
             // Put the code you want to measure the time of here.
         }
     }
