@@ -2,7 +2,7 @@ PureMVC Standard Framework for Swift (Ported)
 --------------------------------------------------------------------------
 Release Date: 03/16/16
     Platform: Swift 
-     Version: 1.1
+     Version: 1.2
     Revision: 0
       Author: Saad Shams <saad.shams@puremvc.org>
 --------------------------------------------------------------------------
@@ -14,3 +14,6 @@ Release Date: 03/16/16
       INotifer in it's declaration since it's already declared and conformed in 
       it's parent class Notifier. Update of var into let declarations for never 
       mutated variables.
+
+1.2 - Swift 3.0 support added.
+
