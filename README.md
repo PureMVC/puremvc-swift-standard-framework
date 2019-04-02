@@ -5,7 +5,6 @@ PureMVC is a lightweight framework for creating applications based upon the clas
 * [API Docs](http://puremvc.org/pages/docs/Swift/standard/)
 * [Unit Tests](http://puremvc.github.io/images/Swift/unittest/standard.png)
 * [Discussion](http://forums.puremvc.org/index.php?board=120)
-* [Standard Version Overview Presentation](http://puremvc.tv/#P100)
 
 ## Demos
 * [Employee Admin](https://github.com/PureMVC/puremvc-swift-demo-uikit-employeeadmin/wiki)
@@ -16,16 +15,18 @@ PureMVC is a lightweight framework for creating applications based upon the clas
 * [State Machine](https://github.com/PureMVC/puremvc-swift-util-statemachine/wiki)
 
 ## Status
-Production - [Version 1.2.0](https://github.com/PureMVC/puremvc-swift-standard-framework/blob/master/VERSION)
+Production - [Version 1.3](https://github.com/PureMVC/puremvc-swift-standard-framework/blob/master/VERSION)
 
 ## Platforms / Technologies
 * [Swift](http://en.wikipedia.org/wiki/Swift_(programming_language))
 * [iOS](http://en.wikipedia.org/wiki/IOS)
-* [Mac OS](http://en.wikipedia.org/wiki/Mac_OS)
+* [watchOS](https://en.wikipedia.org/wiki/WatchOS)
+* [tvOS](https://en.wikipedia.org/wiki/TvOS)
+* [MacOS](https://en.wikipedia.org/wiki/MacOS)
 
 ## License
-* PureMVC Standard Framework for Swift - Copyright © 2015-2025 Saad Shams
-* PureMVC - Copyright © 2015-2025 [Futurescale, Inc](http://futurescale.com) 
+* PureMVC Standard Framework for Swift - Copyright © 2015-2019 [Saad Shams](https://www.linkedin.com/in/muizz/) 
+* PureMVC - Copyright © 2015-2019 [Futurescale, Inc](http://futurescale.com) 
 * All rights reserved.
 
 * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
