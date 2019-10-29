@@ -6,9 +6,6 @@ PureMVC is a lightweight framework for creating applications based upon the clas
 * [Unit Tests](http://puremvc.github.io/images/Swift/unittest/standard.png)
 * [Discussion](http://forums.puremvc.org/index.php?board=120)
 
-## Demos
-* [Employee Admin](https://github.com/PureMVC/puremvc-swift-demo-uikit-employeeadmin/wiki)
-
 ## Utilities
 * [Async Command](https://github.com/PureMVC/puremvc-swift-util-asynccommand/wiki)
 * [Async Proxy](https://github.com/PureMVC/puremvc-swift-util-asyncproxy/wiki)

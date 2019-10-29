@@ -155,8 +155,8 @@ open class View: IView {
             if let observers = self.observerMap[notificationName] {
                 
                 // find the observer for the notifyContext
-                for (index, _) in observers.enumerated() {
-                    if observers[index].compareNotifyContext(notifyContext) {
+                for (index, observer) in observers.enumerated() {
+                    if observer.compareNotifyContext(notifyContext) {
                         // there can only be one Observer for a given notifyContext
                         // in any given Observer list, so remove it and break
                         self.observerMap[notificationName]!.remove(at: index)
