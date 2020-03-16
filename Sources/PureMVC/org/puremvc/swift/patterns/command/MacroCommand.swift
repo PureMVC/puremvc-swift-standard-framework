@@ -2,7 +2,7 @@
 //  MacroCommand.swift
 //  PureMVC SWIFT Standard
 //
-//  Copyright(c) 2015-2025 Saad Shams <saad.shams@puremvc.org>
+//  Copyright(c) 2020 Saad Shams <saad.shams@puremvc.org>
 //  Your reuse is governed by the Creative Commons Attribution 3.0 License
 //
 
@@ -33,7 +33,7 @@ to be executed.
 */
 open class MacroCommand: Notifier, ICommand {
     
-    fileprivate var subCommands: [() -> ICommand]
+    internal var subCommands: [() -> ICommand] = []
     
     /**
     Constructor.
@@ -46,7 +46,6 @@ open class MacroCommand: Notifier, ICommand {
     sure to call `super()`.
     */
     public override init() {
-        subCommands = []
         super.init()
         initializeMacroCommand()
     }
@@ -58,15 +57,15 @@ open class MacroCommand: Notifier, ICommand {
     initialize the `MacroCommand`'s *SubCommand*
     list with closure references like
     this:
-    
+
         // Initialize MyMacroCommand
         public func addSubCommand(closure: () -> ICommand) {
             addSubCommand( { FirstCommand() } );
-			addSubCommand( { SecondCommand() } );
-            addSubCommand { ThirdCommand() }; //or by using a trailing closure
+            addSubCommand( { SecondCommand() } );
+            addSubCommand( ) { ThirdCommand() }; //or by using a trailing closure
         }
     
-    Note that *SubCommands* may be any closure returning `ICommand` 
+    Note that *SubCommands* may be any closure returning `ICommand`
     implementor, `MacroCommands` or `SimpleCommands` are both acceptable.
     */
     open func initializeMacroCommand() {
@@ -79,10 +78,10 @@ open class MacroCommand: Notifier, ICommand {
     The *SubCommands* will be called in First In/First Out (FIFO)
     order.
     
-    - parameter closure: reference that returns `ICommand`
+    - parameter closure: reference that returns `ICommand`.
     */
-    open func addSubCommand(_ closure: @escaping () -> ICommand) {
-        subCommands.append(closure)
+    open func addSubCommand(_ factory: @escaping () -> ICommand) {
+        subCommands.append(factory)
     }
     
     /**
@@ -95,8 +94,8 @@ open class MacroCommand: Notifier, ICommand {
     */
     public final func execute(_ notification: INotification) {
         while (!subCommands.isEmpty) {
-            let closure = subCommands.remove(at: 0)
-            let commandInstance = closure()
+            let factory = subCommands.remove(at: 0)
+            let commandInstance = factory()
             commandInstance.execute(notification)
         }
     }

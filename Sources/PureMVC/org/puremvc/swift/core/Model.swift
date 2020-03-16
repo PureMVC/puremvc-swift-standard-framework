@@ -2,7 +2,7 @@
 //  Model.swift
 //  PureMVC SWIFT Standard
 //
-//  Copyright(c) 2015-2025 Saad Shams <saad.shams@puremvc.org>
+//  Copyright(c) 2020 Saad Shams <saad.shams@puremvc.org>
 //  Your reuse is governed by the Creative Commons Attribution 3.0 License
 //
 
@@ -32,20 +32,20 @@ actors.
 open class Model: IModel {
     
     // Mapping of proxyNames to IProxy instances
-    fileprivate var proxyMap: [String: IProxy]
+    internal var proxyMap = [String: IProxy]()
     
-    // Singleton instance
-    fileprivate static var instance: IModel?
-    
-    // Concurrent queue for singleton instance
-    fileprivate static let instanceQueue = DispatchQueue(label: "org.puremvc.model.instanceQueue", attributes: DispatchQueue.Attributes.concurrent)
-        
     // Concurrent queue for proxyMap
     // for speed and convenience of running concurrently while reading, and thread safety of blocking while mutating
-    fileprivate let proxyMapQueue = DispatchQueue(label: "org.puremvc.model.proxyMapQueue", attributes: DispatchQueue.Attributes.concurrent)
+    internal let proxyMapQueue = DispatchQueue(label: "org.puremvc.model.proxyMapQueue", attributes: DispatchQueue.Attributes.concurrent)
     
+    // Singleton instance
+    private static var instance: IModel?
+    
+    // Concurrent queue for singleton instance
+    private static let instanceQueue = DispatchQueue(label: "org.puremvc.model.instanceQueue", attributes: DispatchQueue.Attributes.concurrent)
+
     /// Message constant
-    public static let SINGLETON_MSG = "Model Singleton already constructed!"
+    internal static let SINGLETON_MSG = "Model Singleton already constructed!"
     
     /**
     Constructor.
@@ -59,7 +59,6 @@ open class Model: IModel {
     */
     public init() {
         assert(Model.instance == nil, Model.SINGLETON_MSG)
-        proxyMap = [:]
         Model.instance = self
         initializeModel()
     }
@@ -79,13 +78,13 @@ open class Model: IModel {
     /**
     `Model` Singleton Factory method.
     
-    - parameter closure: reference that returns `IModel`
+    - parameter factory: reference that returns `IModel`
     - returns: the Singleton instance
     */
-    open class func getInstance(_ closure: () -> IModel) -> IModel {
+    open class func getInstance(_ factory: () -> IModel) -> IModel {
         instanceQueue.sync(flags: .barrier, execute: {
             if(Model.instance == nil) {
-                Model.instance = closure()
+                Model.instance = factory()
             }
         })
         return instance!
@@ -98,7 +97,7 @@ open class Model: IModel {
     */
     open func registerProxy(_ proxy: IProxy) {
         proxyMapQueue.sync(flags: .barrier, execute: {
-            self.proxyMap[proxy.proxyName] = proxy
+            proxyMap[proxy.name] = proxy
             proxy.onRegister()
         }) 
     }
@@ -112,7 +111,7 @@ open class Model: IModel {
     open func retrieveProxy(_ proxyName: String) -> IProxy? {
         var proxy: IProxy?
         proxyMapQueue.sync {
-            proxy = self.proxyMap[proxyName]
+            proxy = proxyMap[proxyName]
         }
         return proxy
     }
@@ -126,7 +125,7 @@ open class Model: IModel {
     open func hasProxy(_ proxyName: String) -> Bool {
         var result = false
         proxyMapQueue.sync {
-            result = self.proxyMap[proxyName] != nil
+            result = proxyMap[proxyName] != nil
         }
         return result
     }
@@ -140,9 +139,9 @@ open class Model: IModel {
     open func removeProxy(_ proxyName: String) -> IProxy? {
         var removed: IProxy?
         proxyMapQueue.sync(flags: .barrier, execute: {
-            if let proxy = self.proxyMap[proxyName] {
+            if let proxy = proxyMap[proxyName] {
                 proxy.onRemove()
-                removed = self.proxyMap.removeValue(forKey: proxyName)
+                removed = proxyMap.removeValue(forKey: proxyName)
             }
         }) 
         return removed

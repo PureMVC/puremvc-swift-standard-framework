@@ -2,7 +2,7 @@
 //  Controller.swift
 //  PureMVC SWIFT Standard
 //
-//  Copyright(c) 2015-2025 Saad Shams <saad.shams@puremvc.org>
+//  Copyright(c) 2020 Saad Shams <saad.shams@puremvc.org>
 //  Your reuse is governed by the Creative Commons Attribution 3.0 License
 //
 
@@ -39,24 +39,24 @@ registrations.
 */
 open class Controller: IController {
     
-    // Local reference to View
-    fileprivate var _view: IView?
+    /// Local reference to View
+    internal var view: IView!
     
-    // Mapping of Notification names to references of the closures that instantiates and return `ICommand` instance
-    fileprivate var commandMap: [String: () -> ICommand]
-    
-    // Singleton instance
-    fileprivate static var instance: IController?
-    
-    /// Message constant
-    public static let SINGLETON_MSG = "Controller Singleton already constructed!"
-    
-    // Concurrent queue for singleton instance
-    fileprivate static let instanceQueue = DispatchQueue(label: "org.puremvc.controller.instanceQueue", attributes: DispatchQueue.Attributes.concurrent)
+    // Mapping of Notification names to references of the factories that instantiates and return `ICommand` instance
+    internal var commandMap = [String: () -> ICommand]()
     
     // Concurrent queue for commandMap
     // for speed and convenience of running concurrently while reading, and thread safety of blocking while mutating
-    fileprivate let commandMapQueue = DispatchQueue(label: "org.puremvc.controller.commandMapQueue", attributes: DispatchQueue.Attributes.concurrent)
+    internal let commandMapQueue = DispatchQueue(label: "org.puremvc.controller.commandMapQueue", attributes: DispatchQueue.Attributes.concurrent)
+    
+    // Singleton instance
+    private static var instance: IController?
+    
+    // Concurrent queue for singleton instance
+    private static let instanceQueue = DispatchQueue(label: "org.puremvc.controller.instanceQueue", attributes: DispatchQueue.Attributes.concurrent)
+    
+    /// Message constant
+    internal static let SINGLETON_MSG = "Controller Singleton already constructed!"
     
     /**
     Constructor.
@@ -70,7 +70,6 @@ open class Controller: IController {
     */
     public init() {
         assert(Controller.instance == nil, Controller.SINGLETON_MSG)
-        commandMap = [:]
         Controller.instance = self
         initializeController()
     }
@@ -97,31 +96,16 @@ open class Controller: IController {
     /**
     `Controller` Singleton Factory method.
     
-    - parameter closure: reference that returns `IController`
+    - parameter factory: reference that returns `IController`
     - returns: the Singleton instance of `Controller`
     */
-    open class func getInstance(_ closure: () -> IController) -> IController {
+    open class func getInstance(_ factory: () -> IController) -> IController {
         instanceQueue.sync(flags: .barrier, execute: {
             if(Controller.instance == nil) {
-                Controller.instance = closure()
+                Controller.instance = factory()
             }
         })
         return instance!
-    }
-    
-    /**
-    If an `ICommand` has previously been registered
-    to handle a the given `INotification`, then it is executed.
-    
-    - parameter note: an `INotification`
-    */
-    open func executeCommand(_ notification: INotification) {
-        commandMapQueue.sync {
-            if let closure = self.commandMap[notification.name] {
-                let commandInstance = closure()
-                commandInstance.execute(notification)
-            }
-        }
     }
     
     /**
@@ -136,15 +120,30 @@ open class Controller: IController {
     first time an ICommand has been regisered for this Notification name.
     
     - parameter notificationName: the name of the `INotification`
-    - parameter closure: reference that instantiates and returns `ICommand`
+    - parameter factory: reference that instantiates and returns `ICommand`
     */
-    open func registerCommand(_ notificationName: String, closure: @escaping () -> ICommand) {
+    open func registerCommand(_ notificationName: String, factory: @escaping () -> ICommand) {
         commandMapQueue.sync(flags: .barrier, execute: {
-            if self.commandMap[notificationName] == nil { //weak reference to Controller (self) to avoid reference cycle with View and Observer
-                self.view!.registerObserver(notificationName, observer: Observer(notifyMethod: {[weak self] notification in self!.executeCommand(notification)}, notifyContext: self))
+            if commandMap[notificationName] == nil { // weak reference to Controller (self) to avoid reference cycle with View and Observer
+                view.registerObserver(notificationName, observer: Observer(notifyMethod: {[weak self] notification in self?.executeCommand(notification)}, notifyContext: self))
             }
-            self.commandMap[notificationName] = closure
+            commandMap[notificationName] = factory
         }) 
+    }
+    
+    /**
+    If an `ICommand` has previously been registered
+    to handle a the given `INotification`, then it is executed.
+    
+    - parameter note: an `INotification`
+    */
+    open func executeCommand(_ notification: INotification) {
+        commandMapQueue.sync {
+            if let factory = commandMap[notification.name] {
+                let commandInstance = factory()
+                commandInstance.execute(notification)
+            }
+        }
     }
     
     /**
@@ -156,7 +155,7 @@ open class Controller: IController {
     open func hasCommand(_ notificationName: String) -> Bool {
         var result = false
         commandMapQueue.sync {
-            result = self.commandMap[notificationName] != nil
+            result = commandMap[notificationName] != nil
         }
         return result
     }
@@ -167,17 +166,12 @@ open class Controller: IController {
     - parameter notificationName: the name of the `INotification` to remove the `ICommand` mapping for
     */
     open func removeCommand(_ notificationName: String) {
-        if self.hasCommand(notificationName) {
+        if hasCommand(notificationName) {
             commandMapQueue.sync(flags: .barrier, execute: {
-                self.view!.removeObserver(notificationName, notifyContext: self)
-                self.commandMap.removeValue(forKey: notificationName)
+                view.removeObserver(notificationName, notifyContext: self)
+                commandMap.removeValue(forKey: notificationName)
             }) 
         }
     }
-    
-    /// Local reference to View
-    open var view: IView? {
-        get { return _view }
-        set { _view = newValue }
-    }
+
 }

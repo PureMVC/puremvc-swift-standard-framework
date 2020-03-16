@@ -2,7 +2,7 @@
 //  ControllerTest.swift
 //  PureMVC SWIFT Standard
 //
-//  Copyright(c) 2015-2025 Saad Shams <saad.shams@puremvc.org>
+//  Copyright(c) 2020 Saad Shams <saad.shams@puremvc.org>
 //  Your reuse is governed by the Creative Commons Attribution 3.0 License
 //
 
@@ -56,7 +56,7 @@ class ControllerTest: XCTestCase {
     func testRegisterAndExecuteCommand() {
         // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
         let controller: IController = Controller.getInstance() { Controller() }
-        controller.registerCommand("ControllerTest", closure: {ControllerTestCommand()})
+        controller.registerCommand("ControllerTest", factory: {ControllerTestCommand()})
         
         // Create a 'ControllerTest' note
         let vo: ControllerTestVO = ControllerTestVO(input: 12)
@@ -81,7 +81,7 @@ class ControllerTest: XCTestCase {
     func testRegisterAndRemoveCommand() {
         // Create the controller, register the ControllerTestCommand to handle 'ControllerTest' notes
         let controller: IController = Controller.getInstance() { Controller() }
-        controller.registerCommand("ControllerRemoveTest", closure: {ControllerTestCommand()})
+        controller.registerCommand("ControllerRemoveTest", factory: {ControllerTestCommand()})
         
         // Create a 'ControllerTest' note
         let vo = ControllerTestVO(input: 12)
@@ -116,7 +116,7 @@ class ControllerTest: XCTestCase {
     func testHasCommand() {
         // register the ControllerTestCommand to handle 'hasCommandTest' notes
         let controller = Controller.getInstance() { Controller() }
-        controller.registerCommand("hasCommandTest", closure: {ControllerTestCommand()})
+        controller.registerCommand("hasCommandTest", factory: {ControllerTestCommand()})
         
         // test that hasCommand returns true for hasCommandTest notifications
         XCTAssertTrue(controller.hasCommand("hasCommandTest"), "Expecting controller.hasCommand('hasCommandTest') == true")
@@ -142,13 +142,13 @@ class ControllerTest: XCTestCase {
     func testReregisterAndExecuteCommand() {
         // Fetch the controller, register the ControllerTestCommand2 to handle 'ControllerTest2' notes
         let controller = Controller.getInstance() { Controller() }
-        controller.registerCommand("ControllerTest2", closure: {ControllerTestCommand2()})
+        controller.registerCommand("ControllerTest2", factory: {ControllerTestCommand2()})
         
         // Remove the Command from the Controller
         controller.removeCommand("ControllerTest2")
         
         // Re-register the Command with the Controller
-        controller.registerCommand("ControllerTest2", closure: {ControllerTestCommand2()})
+        controller.registerCommand("ControllerTest2", factory: {ControllerTestCommand2()})
         
         // Create a 'ControllerTest2' note
         let vo = ControllerTestVO(input: 12)

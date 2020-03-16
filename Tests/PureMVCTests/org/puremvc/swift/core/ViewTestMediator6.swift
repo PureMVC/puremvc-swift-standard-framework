@@ -2,7 +2,7 @@
 //  ViewTestMediator6.swift
 //  PureMVC SWIFT Standard
 //
-//  Copyright(c) 2015-2025 Saad Shams <saad.shams@puremvc.org>
+//  Copyright(c) 2020 Saad Shams <saad.shams@puremvc.org>
 //  Your reuse is governed by the Creative Commons Attribution 3.0 License
 //
 
@@ -23,8 +23,8 @@ public class ViewTestMediator6: Mediator {
     /**
     Constructor
     */
-    public init(mediatorName: String, viewComponent: AnyObject?) {
-        super.init(mediatorName: mediatorName, viewComponent: viewComponent)
+    public init(name: String, viewComponent: AnyObject?) {
+        super.init(name: name, viewComponent: viewComponent)
     }
     
     public override func listNotificationInterests() -> [String] {
@@ -34,7 +34,7 @@ public class ViewTestMediator6: Mediator {
     public override func handleNotification(_ notification: INotification) {
         //temp implementation until facade is developed
         let view: IView = View.getInstance() { View() }
-        _ = view.removeMediator(mediatorName)
+        _ = view.removeMediator(name)
     }
     
     public override func onRemove() {

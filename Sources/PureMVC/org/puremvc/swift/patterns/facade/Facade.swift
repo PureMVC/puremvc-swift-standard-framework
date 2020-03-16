@@ -2,7 +2,7 @@
 //  Facade.swift
 //  PureMVC SWIFT Standard
 //
-//  Copyright(c) 2015-2025 Saad Shams <saad.shams@puremvc.org>
+//  Copyright(c) 2020 Saad Shams <saad.shams@puremvc.org>
 //  Your reuse is governed by the Creative Commons Attribution 3.0 License
 //
 
@@ -29,19 +29,23 @@ A base Multiton `IFacade` implementation.
 */
 open class Facade: IFacade {
     
-    // References to Model, View and Controller
-    fileprivate var controller: IController?
-    fileprivate var model: IModel?
-    fileprivate var view: IView?
+    /// Reference to the Controller
+    internal var controller: IController!
+    
+    /// Reference to the Model
+    internal var model: IModel!
+    
+    /// Reference to the View
+    internal var view: IView!
     
     // The Singleton Facade instance
-    fileprivate static var instance: IFacade?
+    private static var instance: IFacade?
     
     // Concurrent queue for singleton instance
-    fileprivate static let instanceQueue = DispatchQueue(label: "org.puremvc.facade.instanceQueue", attributes: DispatchQueue.Attributes.concurrent)
+    private static let instanceQueue = DispatchQueue(label: "org.puremvc.facade.instanceQueue", attributes: DispatchQueue.Attributes.concurrent)
     
     /// Message Constant
-    public static let SINGLETON_MSG = "Facade Singleton already constructed!"
+    internal static let SINGLETON_MSG = "Facade Singleton already constructed!"
     
     /**
     Constructor.
@@ -76,13 +80,13 @@ open class Facade: IFacade {
     /**
     Facade Singleton Factory method
 
-    - parameter closure: reference that returns `IFacade`
+    - parameter factory: reference that returns `IFacade`
     - returns: the Singleton instance of the `IFacade`
     */
-    open class func getInstance(_ closure: (() -> IFacade)) -> IFacade {
+    open class func getInstance(_ factory: (() -> IFacade)) -> IFacade {
         instanceQueue.sync(flags: .barrier, execute: {
             if(Facade.instance == nil) {
-                Facade.instance = closure()
+                Facade.instance = factory()
             }
         })
         return instance!
@@ -103,9 +107,6 @@ open class Facade: IFacade {
     method, then register `Commands`.
     */
     open func initializeController() {
-        if controller != nil {
-            return
-        }
         controller = Controller.getInstance { Controller() }
     }
     
@@ -131,9 +132,6 @@ open class Facade: IFacade {
     the `Facade` during their construction.
     */
     open func initializeModel() {
-        if model != nil {
-            return
-        }
         model = Model.getInstance { Model() }
     }
     
@@ -158,9 +156,6 @@ open class Facade: IFacade {
     to the `Facade` during their construction.
     */
     open func initializeView() {
-        if view != nil {
-            return
-        }
         view = View.getInstance { View() }
     }
     
@@ -171,16 +166,7 @@ open class Facade: IFacade {
     - parameter closure: reference that returns `ICommand`
     */
     open func registerCommand(_ notificationName: String, closure: @escaping () -> ICommand) {
-        controller!.registerCommand(notificationName, closure: closure)
-    }
-    
-    /**
-    Remove a previously registered `ICommand` to `INotification` mapping from the Controller.
-    
-    - parameter notificationName: the name of the `INotification` to remove the `ICommand` mapping for
-    */
-    open func removeCommand(_ notificationName: String) {
-        controller!.removeCommand(notificationName)
+        controller.registerCommand(notificationName, factory: closure)
     }
     
     /**
@@ -190,7 +176,16 @@ open class Facade: IFacade {
     - returns: whether a Command is currently registered for the given `notificationName`.
     */
     open func hasCommand(_ notificationName: String) -> Bool {
-        return controller!.hasCommand(notificationName)
+        return controller.hasCommand(notificationName)
+    }
+    
+    /**
+    Remove a previously registered `ICommand` to `INotification` mapping from the Controller.
+    
+    - parameter notificationName: the name of the `INotification` to remove the `ICommand` mapping for
+    */
+    open func removeCommand(_ notificationName: String) {
+        controller.removeCommand(notificationName)
     }
     
     /**
@@ -200,7 +195,7 @@ open class Facade: IFacade {
     - parameter proxy: the `IProxy` instance to be registered with the `Model`.
     */
     open func registerProxy(_ proxy: IProxy) {
-        model!.registerProxy(proxy)
+        model.registerProxy(proxy)
     }
     
     /**
@@ -210,17 +205,7 @@ open class Facade: IFacade {
     - returns: the `IProxy` instance previously registered with the given `proxyName`.
     */
     open func retrieveProxy(_ proxyName: String) -> IProxy? {
-        return model!.retrieveProxy(proxyName)
-    }
-    
-    /**
-    Remove an `IProxy` from the `Model` by name.
-    
-    - parameter proxyName: the `IProxy` to remove from the `Model`.
-    - returns: the `IProxy` that was removed from the `Model`
-    */
-    open func removeProxy(_ proxyName: String) -> IProxy? {
-        return model!.removeProxy(proxyName)
+        return model.retrieveProxy(proxyName)
     }
     
     /**
@@ -230,7 +215,17 @@ open class Facade: IFacade {
     - returns: whether a Proxy is currently registered with the given `proxyName`.
     */
     open func hasProxy(_ proxyName: String) -> Bool {
-        return model!.hasProxy(proxyName)
+        return model.hasProxy(proxyName)
+    }
+    
+    /**
+    Remove an `IProxy` from the `Model` by name.
+    
+    - parameter proxyName: the `IProxy` to remove from the `Model`.
+    - returns: the `IProxy` that was removed from the `Model`
+    */
+    open func removeProxy(_ proxyName: String) -> IProxy? {
+        return model.removeProxy(proxyName)
     }
     
     /**
@@ -240,7 +235,7 @@ open class Facade: IFacade {
     - parameter mediator: a reference to the `IMediator`
     */
     open func registerMediator(_ mediator: IMediator) {
-        view!.registerMediator(mediator)
+        view.registerMediator(mediator)
     }
     
     /**
@@ -250,17 +245,7 @@ open class Facade: IFacade {
     - returns: the `IMediator` previously registered with the given `mediatorName`.
     */
     open func retrieveMediator(_ mediatorName: String) -> IMediator? {
-        return view!.retrieveMediator(mediatorName)
-    }
-    
-    /**
-    Remove an `IMediator` from the `View`.
-    
-    - parameter mediatorName: name of the `IMediator` to be removed.
-    - returns: the `IMediator` that was removed from the `View`
-    */
-    open func removeMediator(_ mediatorName: String) -> IMediator? {
-        return view!.removeMediator(mediatorName)
+        return view.retrieveMediator(mediatorName)
     }
     
     /**
@@ -270,7 +255,17 @@ open class Facade: IFacade {
     - returns: whether a Mediator is registered with the given `mediatorName`.
     */
     open func hasMediator(_ mediatorName: String) -> Bool {
-        return view!.hasMediator(mediatorName)
+        return view.hasMediator(mediatorName)
+    }
+    
+    /**
+    Remove an `IMediator` from the `View`.
+    
+    - parameter mediatorName: name of the `IMediator` to be removed.
+    - returns: the `IMediator` that was removed from the `View`
+    */
+    open func removeMediator(_ mediatorName: String) -> IMediator? {
+        return view.removeMediator(mediatorName)
     }
     
     /**
@@ -291,6 +286,31 @@ open class Facade: IFacade {
     }
     
     /**
+    Create and send an `INotification`.
+    
+    Keeps us from having to construct new notification
+    instances in our implementation code.
+    
+    - parameter notificationName: the name of the notiification to send
+    - parameter body: the body of the notification (optional)
+    */
+    open func sendNotification(_ notificationName: String, body: Any) {
+        notifyObservers(Notification(name: notificationName, body: body))
+    }
+    
+    /**
+    Create and send an `INotification`.
+    
+    Keeps us from having to construct new notification
+    instances in our implementation code.
+    
+    - parameter notificationName: the name of the notiification to send
+    */
+    open func sendNotification(_ notificationName: String) {
+        notifyObservers(Notification(name: notificationName))
+    }
+    
+    /**
     Notify `Observer`s.
     
     This method is left public mostly for backward
@@ -304,7 +324,7 @@ open class Facade: IFacade {
     - parameter notification: the `INotification` to have the `View` notify `Observers` of.
     */
     open func notifyObservers(_ notification: INotification) {
-        view!.notifyObservers(notification)
+        view.notifyObservers(notification)
     }
 
 }

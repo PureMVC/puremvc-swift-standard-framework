@@ -2,7 +2,7 @@
 //  Notifier.swift
 //  PureMVC SWIFT Standard
 //
-//  Copyright(c) 2015-2025 Saad Shams <saad.shams@puremvc.org>
+//  Copyright(c) 2020 Saad Shams <saad.shams@puremvc.org>
 //  Your reuse is governed by the Creative Commons Attribution 3.0 License
 //
 
@@ -36,12 +36,7 @@ access to the facade anyway.
 open class Notifier : INotifier {
 
     /// Reference to the Facade Singleton
-    open var facade:IFacade = Facade.getInstance() { Facade() }
-    
-    /// Constructor
-    public init() {
-        
-    }
+    open lazy var facade:IFacade = Facade.getInstance() { Facade() }
     
     /**
     Create and send an `INotification`.
@@ -55,6 +50,31 @@ open class Notifier : INotifier {
     */
     open func sendNotification(_ notificationName: String, body: Any?=nil, type: String?=nil) {
         facade.sendNotification(notificationName, body: body, type: type)
+    }
+    
+    /**
+    Create and send an `INotification`.
+    
+    Keeps us from having to construct new INotification
+    instances in our implementation code.
+    
+    - parameter notificationName: the name of the notification to send
+    - parameter body: the body of the notification (optional)
+    */
+    open func sendNotification(_ notificationName: String, body: Any) {
+        facade.sendNotification(notificationName, body: body)
+    }
+    
+    /**
+    Create and send an `INotification`.
+    
+    Keeps us from having to construct new INotification
+    instances in our implementation code.
+    
+    - parameter notificationName: the name of the notification to send
+    */
+    open func sendNotification(_ notificationName: String) {
+        facade.sendNotification(notificationName)
     }
     
 }

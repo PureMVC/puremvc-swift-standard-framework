@@ -2,7 +2,7 @@
 //  FacadeTest.swift
 //  PureMVC SWIFT Standard
 //
-//  Copyright(c) 2015-2025 Saad Shams <saad.shams@puremvc.org>
+//  Copyright(c) 2020 Saad Shams <saad.shams@puremvc.org>
 //  Your reuse is governed by the Creative Commons Attribution 3.0 License
 //
 
@@ -104,7 +104,7 @@ class FacadeTest: XCTestCase {
     func testRegisterAndRetrieveProxy() {
         // register a proxy and retrieve it.
         let facade = Facade.getInstance({Facade()})
-        facade.registerProxy(Proxy(proxyName: "colors", data: ["red", "green", "blue"]))
+        facade.registerProxy(Proxy(name: "colors", data: ["red", "green", "blue"]))
         let proxy = facade.retrieveProxy("colors")
         
         // retrieve data from proxy
@@ -125,14 +125,14 @@ class FacadeTest: XCTestCase {
     func testRegisterAndRemoveProxy() {
         // register a proxy, remove it, then try to retrieve it
         let facade = Facade.getInstance() { Facade() }
-        let proxy: IProxy = Proxy(proxyName: "sizes", data: ["7", "13", "21"])
+        let proxy: IProxy = Proxy(name: "sizes", data: ["7", "13", "21"])
         facade.registerProxy(proxy)
         
         // remove the proxy
         let removedProxy = facade.removeProxy("sizes")
         
         // assert that we removed the appropriate proxy
-        XCTAssertTrue(removedProxy?.proxyName == "sizes", "Expecting removedProxy.proxyName == 'sizes' \(String(describing: removedProxy?.proxyName))")
+        XCTAssertTrue(removedProxy?.name == "sizes", "Expecting removedProxy.proxyName == 'sizes' \(String(describing: removedProxy?.name))")
         
         // make sure we can no longer retrieve the proxy from the model
         let proxy2: IProxy? = facade.retrieveProxy("sizes")
@@ -147,7 +147,7 @@ class FacadeTest: XCTestCase {
     func testRegisterRetrieveAndRemoveMediator() {
         // register a mediator, remove it, then try to retrieve it
         let facade = Facade.getInstance({ Facade() })
-        facade.registerMediator(Mediator(mediatorName: Mediator.NAME, viewComponent: Mediator()))
+        facade.registerMediator(Mediator(name: Mediator.NAME, viewComponent: Mediator()))
         
         // retrieve the mediator
         XCTAssertNotNil(facade.retrieveMediator(Mediator.NAME) as? Mediator, "Expecting mediator is not nil")
@@ -156,7 +156,7 @@ class FacadeTest: XCTestCase {
         let removedMediator = facade.removeMediator(Mediator.NAME)
         
         // assert that we have removed the appropriate mediator
-        XCTAssertTrue(removedMediator?.mediatorName == Mediator.NAME, "Expecting removedMediator.mediatorName == Mediator.NAME")
+        XCTAssertTrue(removedMediator?.name == Mediator.NAME, "Expecting removedMediator.mediatorName == Mediator.NAME")
         
         // assert that the mediator is no longer retrievable
         XCTAssertNil(facade.retrieveMediator(Mediator.NAME) as? Mediator, "facade.retrieveMediator(Mediator.NAME) is nil")
@@ -168,7 +168,7 @@ class FacadeTest: XCTestCase {
     func testHasProxy() {
         // register a Proxy
         let facade = Facade.getInstance({ Facade() })
-        facade.registerProxy(Proxy(proxyName: "hasProxyTest", data: [1, 2, 3]))
+        facade.registerProxy(Proxy(name: "hasProxyTest", data: [1, 2, 3]))
         
         // assert that the model.hasProxy method returns true
         // for that proxy name
@@ -181,7 +181,7 @@ class FacadeTest: XCTestCase {
     func testHasMediator() {
         // register a Mediator
         let facade = Facade.getInstance() { Facade() }
-        facade.registerMediator(Mediator(mediatorName: "facadeHasMediatorTest", viewComponent: Mediator()))
+        facade.registerMediator(Mediator(name: "facadeHasMediatorTest", viewComponent: Mediator()))
         
         // assert that the facade.hasMediator method returns true
         // for that mediator name

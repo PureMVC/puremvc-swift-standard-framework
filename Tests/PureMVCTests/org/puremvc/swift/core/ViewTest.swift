@@ -2,7 +2,7 @@
 //  ViewTest.swift
 //  PureMVC SWIFT Standard
 //
-//  Copyright(c) 2015-2025 Saad Shams <saad.shams@puremvc.org>
+//  Copyright(c) 2020 Saad Shams <saad.shams@puremvc.org>
 //  Your reuse is governed by the Creative Commons Attribution 3.0 License
 //
 
@@ -131,7 +131,7 @@ public class ViewTest: XCTestCase {
         let view: IView = View.getInstance() { View() }
         
         // Create and register the test mediator
-        let mediator = Mediator(mediatorName: "hasMediatorTest", viewComponent: self)
+        let mediator = Mediator(name: "hasMediatorTest", viewComponent: self)
         view.registerMediator(mediator)
         
         // assert that the view.hasMediator method returns true
@@ -153,14 +153,14 @@ public class ViewTest: XCTestCase {
         let view: IView = View.getInstance() { View() }
         
         // Create and register the test mediator
-        let mediator: IMediator = Mediator(mediatorName: "testing", viewComponent: self)
+        let mediator: IMediator = Mediator(name: "testing", viewComponent: self)
         view.registerMediator(mediator)
         
         // Remove the component
         let removedMediator: IMediator = view.removeMediator("testing")!
         
         // assert that we have removed the appropriate mediator
-        XCTAssertTrue(removedMediator.mediatorName == "testing", "Expecting removedMediator.mediatorName == 'testing'")
+        XCTAssertTrue(removedMediator.name == "testing", "Expecting removedMediator.mediatorName == 'testing'")
         
         // assert that the mediator is no longer retrievable
         XCTAssertTrue(view.retrieveMediator("testing") == nil, "Expecting view.retrieveMediator('testing') == nil")
@@ -357,14 +357,14 @@ public class ViewTest: XCTestCase {
         // by removing themselves, which will cause the observer list for that notification
         // to change. versions prior to MultiCore Version 2.0.5 will see every other mediator
         // fails to be notified.
-        view.registerMediator(ViewTestMediator6(mediatorName: ViewTestMediator6.NAME + "/1", viewComponent: self))
-        view.registerMediator(ViewTestMediator6(mediatorName: ViewTestMediator6.NAME + "/2", viewComponent: self))
-        view.registerMediator(ViewTestMediator6(mediatorName: ViewTestMediator6.NAME + "/3", viewComponent: self))
-        view.registerMediator(ViewTestMediator6(mediatorName: ViewTestMediator6.NAME + "/4", viewComponent: self))
-        view.registerMediator(ViewTestMediator6(mediatorName: ViewTestMediator6.NAME + "/5", viewComponent: self))
-        view.registerMediator(ViewTestMediator6(mediatorName: ViewTestMediator6.NAME + "/6", viewComponent: self))
-        view.registerMediator(ViewTestMediator6(mediatorName: ViewTestMediator6.NAME + "/7", viewComponent: self))
-        view.registerMediator(ViewTestMediator6(mediatorName: ViewTestMediator6.NAME + "/8", viewComponent: self))
+        view.registerMediator(ViewTestMediator6(name: ViewTestMediator6.NAME + "/1", viewComponent: self))
+        view.registerMediator(ViewTestMediator6(name: ViewTestMediator6.NAME + "/2", viewComponent: self))
+        view.registerMediator(ViewTestMediator6(name: ViewTestMediator6.NAME + "/3", viewComponent: self))
+        view.registerMediator(ViewTestMediator6(name: ViewTestMediator6.NAME + "/4", viewComponent: self))
+        view.registerMediator(ViewTestMediator6(name: ViewTestMediator6.NAME + "/5", viewComponent: self))
+        view.registerMediator(ViewTestMediator6(name: ViewTestMediator6.NAME + "/6", viewComponent: self))
+        view.registerMediator(ViewTestMediator6(name: ViewTestMediator6.NAME + "/7", viewComponent: self))
+        view.registerMediator(ViewTestMediator6(name: ViewTestMediator6.NAME + "/8", viewComponent: self))
         
         // clear the counter
         counter = 0

@@ -2,7 +2,7 @@
 //  ModelTest.swift
 //  PureMVC SWIFT Standard
 //
-//  Copyright(c) 2015-2025 Saad Shams <saad.shams@puremvc.org>
+//  Copyright(c) 2020 Saad Shams <saad.shams@puremvc.org>
 //  Your reuse is governed by the Creative Commons Attribution 3.0 License
 //
 
@@ -43,7 +43,7 @@ class ModelTest: XCTestCase {
     func testRegisterAndRetrieveProxy() {
         // register a proxy and retrieve it.
         let model: IModel = Model.getInstance() { Model() }
-        model.registerProxy(Proxy(proxyName: "colors", data: ["red", "green", "blue"]))
+        model.registerProxy(Proxy(name: "colors", data: ["red", "green", "blue"]))
         let proxy: Proxy = model.retrieveProxy("colors") as! Proxy
         let data: Array<String> = proxy.data as! Array<String>
         
@@ -58,7 +58,7 @@ class ModelTest: XCTestCase {
     //Test with tuple
     func testRegisterAndRetrieveProxy2() {
         let model: IModel = Model.getInstance() { Model() }
-        model.registerProxy(Proxy(proxyName: "tuple", data: (1, "abc", false)))
+        model.registerProxy(Proxy(name: "tuple", data: (1, "abc", false)))
         
         let proxy: Proxy = model.retrieveProxy("tuple") as! Proxy
         let data: (Int, String, Bool)  = proxy.data as! (Int, String, Bool)
@@ -74,14 +74,14 @@ class ModelTest: XCTestCase {
     func testRegisterAndRemoveProxy() {
         // register a proxy, remove it, then try to retrieve it
         let model: IModel = Model.getInstance() { Model() }
-        let proxy: IProxy = Proxy(proxyName: "sizes", data: ["7", "13", "21"])
+        let proxy: IProxy = Proxy(name: "sizes", data: ["7", "13", "21"])
         model.registerProxy(proxy)
         
         // remove the proxy
         let removedProxy = model.removeProxy("sizes")
         
         // assert that we removed the appropriate proxy
-        XCTAssertTrue(removedProxy!.proxyName == "sizes", "Expecting removedProxy.getProxyName() == 'sizes'")
+        XCTAssertTrue(removedProxy!.name == "sizes", "Expecting removedProxy.getProxyName() == 'sizes'")
         
         // ensure that the proxy is no longer retrievable from the model
         let nilProxy = model.retrieveProxy("sizes")
@@ -96,7 +96,7 @@ class ModelTest: XCTestCase {
     func testHasProxy() {
         // register a proxy
         let model: IModel = Model.getInstance() { Model() }
-        let proxy: IProxy = Proxy(proxyName: "aces", data: ["clubs", "spades", "hearts", "diamonds"])
+        let proxy: IProxy = Proxy(name: "aces", data: ["clubs", "spades", "hearts", "diamonds"])
         model.registerProxy(proxy)
         
         // assert that the model.hasProxy method returns true
