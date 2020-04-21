@@ -12,7 +12,7 @@ PureMVC is a lightweight framework for creating applications based upon the clas
 * [State Machine](https://github.com/PureMVC/puremvc-swift-util-statemachine/wiki)
 
 ## Status
-Production - [Version 1.4](https://github.com/PureMVC/puremvc-swift-standard-framework/blob/master/VERSION)
+Production - [Version 1.5](https://github.com/PureMVC/puremvc-swift-standard-framework/blob/master/VERSION)
 
 ## Platforms / Technologies
 * [Swift](http://en.wikipedia.org/wiki/Swift_(programming_language))

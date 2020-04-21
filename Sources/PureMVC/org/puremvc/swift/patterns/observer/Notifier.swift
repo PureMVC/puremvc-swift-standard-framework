@@ -38,6 +38,10 @@ open class Notifier : INotifier {
     /// Reference to the Facade Singleton
     open lazy var facade:IFacade = Facade.getInstance() { Facade() }
     
+    public init() {
+        
+    }
+    
     /**
     Create and send an `INotification`.
     
