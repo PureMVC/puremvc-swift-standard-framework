@@ -1,4 +1,4 @@
-## [PureMVC](http://puremvc.github.com/) Swift Standard Framework
+## [PureMVC](http://puremvc.github.com/) Swift Standard Framework [![Swift](https://github.com/PureMVC/puremvc-swift-standard-framework/actions/workflows/swift.yml/badge.svg)](https://github.com/PureMVC/puremvc-swift-standard-framework/actions/workflows/swift.yml)
 
 PureMVC is a lightweight framework for creating applications based upon the classic [Model-View-Controller](http://en.wikipedia.org/wiki/Model-view-controller) design meta-pattern. This is the specific implementation for the [Swift](https://developer.apple.com/swift/) language. It does not support [modular programming](http://en.wikipedia.org/wiki/Modular_programming) since it uses [Singletons](http://en.wikipedia.org/wiki/Singleton_pattern) as Core actors rather than the [Multiton](http://en.wikipedia.org/wiki/Multiton) used in the [MultiCore](https://github.com/PureMVC/puremvc-swift-multicore-framework/wiki) Version.
 
